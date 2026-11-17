@@ -1,0 +1,42 @@
+class ParkingTicket {
+    private final int ticketNo;
+    private final String vehicleNo;
+    private final String vehicleType;
+
+    ParkingTicket(int ticketNo, String vehicleNo) {
+        this(ticketNo, vehicleNo, "Car");
+    }
+
+    ParkingTicket(int ticketNo, String vehicleNo, String vehicleType) {
+        this.ticketNo = ticketNo;
+        this.vehicleNo = vehicleNo;
+        this.vehicleType = vehicleType;
+    }
+
+    ParkingTicket(ParkingTicket other) {
+        this(other.ticketNo, other.vehicleNo, other.vehicleType);
+    }
+
+    public void display() {
+        System.out.println("Ticket Number: " + ticketNo);
+        System.out.println("Vehicle Number: " + vehicleNo);
+        System.out.println("Vehicle Type: " + vehicleType);
+    }
+}
+
+public class Task04 {
+    public static void main(String[] args) {
+        ParkingTicket t1 = new ParkingTicket(1001, "TN01AB1234");
+        ParkingTicket t2 = new ParkingTicket(1002, "TN02CD5678", "TwoWheeler");
+        ParkingTicket t3 = new ParkingTicket(t1);
+
+        System.out.println("Ticket 1");
+        t1.display();
+
+        System.out.println("\nTicket 2");
+        t2.display();
+
+        System.out.println("\nCopied Ticket");
+        t3.display();
+    }
+}
