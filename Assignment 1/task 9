@@ -1,0 +1,79 @@
+interface Chargeable {
+    double chargingFee(int kWh);
+
+    default void chargingMessage() {
+        System.out.println("Vehicle is using a charging slot.");
+    }
+
+    static double getRatePerUnit() {
+        return 12.0;
+    }
+}
+
+interface Payable {
+    void makePayment(double amount);
+}
+
+abstract class Vehicle {
+    private final String regNo;
+
+    Vehicle(String regNo) {
+        this.regNo = regNo;
+    }
+
+    public String getRegNo() {
+        return regNo;
+    }
+
+    abstract double calculateFee(int hours);
+
+    public void display() {
+        System.out.println("Vehicle Number: " + regNo);
+    }
+}
+
+class Car extends Vehicle implements Payable {
+    Car(String regNo) {
+        super(regNo);
+    }
+
+    @Override
+    double calculateFee(int hours) {
+        return hours * 30.0;
+    }
+
+    @Override
+    public void makePayment(double amount) {
+        System.out.println("Payment received: Rs " + amount);
+    }
+}
+
+class ElectricCar extends Car implements Chargeable {
+    ElectricCar(String regNo) {
+        super(regNo);
+    }
+
+    @Override
+    public double chargingFee(int kWh) {
+        return kWh * Chargeable.getRatePerUnit();
+    }
+}
+
+public class Task09 {
+    public static void main(String[] args) {
+        ElectricCar ev = new ElectricCar("TN01EV1234");
+
+        ev.display();
+
+        double parkingFee = ev.calculateFee(3);
+        double chargingFee = ev.chargingFee(10);
+
+        ev.chargingMessage();
+        ev.makePayment(parkingFee + chargingFee);
+
+        System.out.println("Parking Fee: Rs " + parkingFee);
+        System.out.println("Charging Fee: Rs " + chargingFee);
+        System.out.println("Total Fee: Rs "
+                + (parkingFee + chargingFee));
+    }
+}
