@@ -1,0 +1,131 @@
+import java.sql.*;
+import java.util.*;
+
+class Student {
+    int id;
+    String registerNo;
+    String name;
+    String email;
+
+    Student(int id, String registerNo, String name, String email) {
+        this.id = id;
+        this.registerNo = registerNo;
+        this.name = name;
+        this.email = email;
+    }
+}
+
+interface Dao<T, K> {
+    int insert(T item) throws SQLException;
+    T findById(K id) throws SQLException;
+    List<T> findAll() throws SQLException;
+    int update(T item) throws SQLException;
+    int delete(K id) throws SQLException;
+}
+
+public class StudentDao implements Dao<Student, Integer> {
+
+    static final String URL =
+            "jdbc:mysql://localhost:3306/campus_event";
+    static final String USER = "root";
+    static final String PASSWORD = "your_password";
+
+    Connection connect() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    public int insert(Student s) throws SQLException {
+        String sql = "INSERT INTO students(register_no,name,email) VALUES(?,?,?)";
+
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, s.registerNo);
+            ps.setString(2, s.name);
+            ps.setString(3, s.email);
+
+            return ps.executeUpdate();
+        }
+    }
+
+    public Student findById(Integer id) throws SQLException {
+        String sql = "SELECT * FROM students WHERE id=?";
+
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Student(
+                            rs.getInt("id"),
+                            rs.getString("register_no"),
+                            rs.getString("name"),
+                            rs.getString("email"));
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Student> findAll() throws SQLException {
+        List<Student> list = new ArrayList<>();
+
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement("SELECT * FROM students");
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(new Student(
+                        rs.getInt("id"),
+                        rs.getString("register_no"),
+                        rs.getString("name"),
+                        rs.getString("email")));
+            }
+        }
+        return list;
+    }
+
+    public int update(Student s) throws SQLException {
+        String sql = "UPDATE students SET register_no=?,name=?,email=? WHERE id=?";
+
+        try (Connection con = connect();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, s.registerNo);
+            ps.setString(2, s.name);
+            ps.setString(3, s.email);
+            ps.setInt(4, s.id);
+
+            return ps.executeUpdate();
+        }
+    }
+
+    public int delete(Integer id) throws SQLException {
+        try (Connection con = connect();
+             PreparedStatement ps =
+                     con.prepareStatement("DELETE FROM students WHERE id=?")) {
+
+            ps.setInt(1, id);
+            return ps.executeUpdate();
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        StudentDao dao = new StudentDao();
+
+        Student s = new Student(0, "192311001", "Arun", "arun@gmail.com");
+
+        dao.insert(s);
+
+        Student result = dao.findById(1);
+
+        if (result != null) {
+            System.out.println("Student Name: " + result.name);
+            System.out.println("Register Number: " + result.registerNo);
+        }
+
+        System.out.println("Total Students: " + dao.findAll().size());
+    }
+}
