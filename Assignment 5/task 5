@@ -1,0 +1,51 @@
+import java.sql.*;
+
+public class LoginDemo {
+
+    static final String URL =
+            "jdbc:mysql://localhost:3306/campus_event";
+    static final String USER = "root";
+    static final String PASSWORD = "your_password";
+
+    public static boolean unsafeLogin(String id, String pwd)
+            throws SQLException {
+
+        String sql = "SELECT * FROM users WHERE user_id='" +
+                id + "' AND password='" + pwd + "'";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            return rs.next();
+        }
+    }
+
+    public static boolean safeLogin(String id, String pwd)
+            throws SQLException {
+
+        String sql = "SELECT * FROM users WHERE user_id=? AND password=?";
+
+        try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, id);
+            ps.setString(2, pwd);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        String id = "admin";
+        String password = "wrongpassword";
+
+        System.out.println("Unsafe Login: " +
+                unsafeLogin(id, password));
+
+        System.out.println("Safe Login: " +
+                safeLogin(id, password));
+    }
+}
