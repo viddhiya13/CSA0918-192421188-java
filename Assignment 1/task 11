@@ -1,0 +1,203 @@
+import java.util.*;
+
+abstract class Vehicle {
+    private final String regNo;
+
+    Vehicle(String regNo) {
+        if (regNo == null || regNo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid registration number");
+        }
+        this.regNo = regNo;
+    }
+
+    public String getRegNo() {
+        return regNo;
+    }
+
+    abstract double calculateFee(int minutes);
+}
+
+class TwoWheeler extends Vehicle {
+    TwoWheeler(String regNo) {
+        super(regNo);
+    }
+
+    @Override
+    double calculateFee(int minutes) {
+        int hours = (minutes + 59) / 60;
+        return hours * 10.0;
+    }
+}
+
+class Car extends Vehicle {
+    Car(String regNo) {
+        super(regNo);
+    }
+
+    @Override
+    double calculateFee(int minutes) {
+        int hours = (minutes + 59) / 60;
+        return Math.min(hours * 30.0, 200.0);
+    }
+}
+
+class ElectricCar extends Car {
+    ElectricCar(String regNo) {
+        super(regNo);
+    }
+
+    public double chargingFee(int units) {
+        return units * 12.0;
+    }
+}
+
+class ParkingTicket {
+    private static int counter = 1000;
+
+    private final int ticketNo;
+    private final Vehicle vehicle;
+    private final int floor;
+    private final int slot;
+
+    ParkingTicket(Vehicle vehicle, int floor, int slot) {
+        ticketNo = ++counter;
+        this.vehicle = vehicle;
+        this.floor = floor;
+        this.slot = slot;
+    }
+
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    public int getFloor() {
+        return floor;
+    }
+
+    public int getSlot() {
+        return slot;
+    }
+
+    public void display() {
+        System.out.println("Ticket: " + ticketNo);
+        System.out.println("Vehicle: " + vehicle.getRegNo());
+        System.out.println("Slot: " + floor + "-" + slot);
+    }
+}
+
+class ParkingFacility {
+    private final String[][] slots;
+    private final Map<String, ParkingTicket> activeTickets = new HashMap<>();
+
+    ParkingFacility(int[] slotsPerFloor) {
+        slots = new String[slotsPerFloor.length][];
+
+        for (int i = 0; i < slotsPerFloor.length; i++) {
+            slots[i] = new String[slotsPerFloor[i]];
+        }
+    }
+
+    public ParkingTicket enter(Vehicle vehicle) {
+        if (activeTickets.containsKey(vehicle.getRegNo())) {
+            System.out.println("Duplicate vehicle: " + vehicle.getRegNo());
+            return null;
+        }
+
+        for (int f = 0; f < slots.length; f++) {
+            for (int s = 0; s < slots[f].length; s++) {
+                if (slots[f][s] == null) {
+                    slots[f][s] = vehicle.getRegNo();
+
+                    ParkingTicket ticket =
+                            new ParkingTicket(vehicle, f, s);
+
+                    activeTickets.put(vehicle.getRegNo(), ticket);
+                    return ticket;
+                }
+            }
+        }
+
+        System.out.println("Parking Full");
+        return null;
+    }
+
+    public double exit(String regNo, int minutes) {
+        if (minutes < 0) {
+            System.out.println("Invalid duration");
+            return -1;
+        }
+
+        ParkingTicket ticket = activeTickets.remove(regNo);
+
+        if (ticket == null) {
+            System.out.println("Ticket Not Found");
+            return -1;
+        }
+
+        double fee = ticket.getVehicle().calculateFee(minutes);
+
+        slots[ticket.getFloor()][ticket.getSlot()] = null;
+
+        System.out.println("Vehicle Exited: " + regNo);
+        System.out.println("Parking Fee: Rs " + fee);
+
+        return fee;
+    }
+
+    public void displaySlots() {
+        for (int f = 0; f < slots.length; f++) {
+            System.out.println("Floor " + f + ": "
+                    + Arrays.toString(slots[f]));
+        }
+    }
+}
+
+public class Task11 {
+    public static void main(String[] args) {
+        ParkingFacility parking =
+                new ParkingFacility(new int[]{2, 2, 1});
+
+        Vehicle bike = new TwoWheeler("TN01AB1111");
+        Vehicle car = new Car("TN02CD2222");
+        Vehicle ev = new ElectricCar("TN03EF3333");
+
+        System.out.println("Vehicle Entry");
+
+        ParkingTicket t1 = parking.enter(bike);
+        ParkingTicket t2 = parking.enter(car);
+        ParkingTicket t3 = parking.enter(ev);
+
+        if (t1 != null) t1.display();
+        if (t2 != null) t2.display();
+        if (t3 != null) t3.display();
+
+        System.out.println("\nCurrent Parking Slots");
+        parking.displaySlots();
+
+        System.out.println("\nDuplicate Registration Test");
+        parking.enter(new Car("TN02CD2222"));
+
+        System.out.println("\nExit Processing");
+        double fee1 = parking.exit("TN01AB1111", 60);
+        double fee2 = parking.exit("TN02CD2222", 120);
+        double fee3 = parking.exit("TN03EF3333", 0);
+
+        double total = 0;
+
+        if (fee1 >= 0) total += fee1;
+        if (fee2 >= 0) total += fee2;
+        if (fee3 >= 0) total += fee3;
+
+        System.out.println("\nTotal Collection: Rs " + total);
+
+        System.out.println("\nInvalid Slot Test");
+        try {
+            throw new IllegalArgumentException("Invalid slot number");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        System.out.println("\nFinal Parking Slots");
+        parking.displaySlots();
+    }
+}
