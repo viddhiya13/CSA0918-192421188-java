@@ -1,0 +1,75 @@
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+
+public class PassStore {
+    static final String FILE = "passes.csv";
+
+    public static void add(String id, String regNo, String name,
+                          int route, double amount) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE, true))) {
+            bw.write(id + "," + regNo + "," + name + "," + route + "," + amount);
+            bw.newLine();
+        }
+    }
+
+    public static String[] find(String id) throws IOException {
+        File file = new File(FILE);
+        if (!file.exists()) return null;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",", -1);
+
+                if (data.length != 5) continue;
+
+                try {
+                    Integer.parseInt(data[3]);
+                    Double.parseDouble(data[4]);
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+
+                if (data[0].equals(id)) return data;
+            }
+        }
+        return null;
+    }
+
+    public static void listByRoute(int route) throws IOException {
+        File file = new File(FILE);
+        if (!file.exists()) return;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",", -1);
+
+                if (data.length != 5) continue;
+
+                try {
+                    if (Integer.parseInt(data[3]) == route)
+                        System.out.println(Arrays.toString(data));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        add("P1001", "192311001", "Arun", 12, 4500);
+        add("P1002", "192311002", "Divya", 7, 3800);
+
+        System.out.println("Find P1001: " +
+                Arrays.toString(find("P1001")));
+
+        System.out.println("Find P9999: " +
+                Arrays.toString(find("P9999")));
+
+        System.out.println("Route 12 records:");
+        listByRoute(12);
+    }
+}
