@@ -1,0 +1,51 @@
+import java.util.Scanner;
+
+public class Task02 {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int[] slotsPerFloor = {3, 4, 2};
+        String[][] slots = new String[slotsPerFloor.length][];
+
+        for (int i = 0; i < slotsPerFloor.length; i++) {
+            slots[i] = new String[slotsPerFloor[i]];
+        }
+
+        System.out.print("Enter vehicle number: ");
+        String vehicleNo = sc.nextLine();
+
+        boolean allocated = false;
+
+        for (int floor = 0; floor < slots.length; floor++) {
+            for (int slot = 0; slot < slots[floor].length; slot++) {
+                if (slots[floor][slot] == null) {
+                    slots[floor][slot] = vehicleNo;
+                    System.out.println("Allocated Floor: " + floor);
+                    System.out.println("Allocated Slot: " + slot);
+                    allocated = true;
+                    break;
+                }
+            }
+
+            if (allocated) {
+                break;
+            }
+        }
+
+        if (!allocated) {
+            System.out.println("Parking Full");
+        }
+
+        int minutes = 90;
+        double hourlyRate = 30.0;
+
+        // Convert minutes to hours without integer division.
+        double hours = Math.ceil(minutes / 60.0);
+        double fee = hours * hourlyRate;
+
+        System.out.println("Parking Duration: " + minutes + " minutes");
+        System.out.println("Parking Fee: Rs " + fee);
+
+        sc.close();
+    }
+}
