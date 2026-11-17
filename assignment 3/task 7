@@ -1,0 +1,126 @@
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.*;
+
+class ResultTask implements Callable<String> {
+
+    private String fileName;
+
+    ResultTask(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String call() {
+
+        try {
+            String data = new String(
+                Files.readAllBytes(Paths.get(fileName))
+            ).trim();
+
+            int mark = Integer.parseInt(data);
+
+            if (mark < 0 || mark > 100) {
+                throw new IllegalArgumentException(
+                    "Invalid mark"
+                );
+            }
+
+            return "SUCCESS: " + fileName
+                    + " Result: " + mark;
+
+        } catch (Exception e) {
+
+            return "FAILED: " + fileName
+                    + " Reason: " + e.getMessage();
+        }
+    }
+}
+
+public class ResultProcessor {
+
+    public static void main(String[] args)
+            throws Exception {
+
+        int poolSize = 4;
+
+        if (args.length > 0) {
+            poolSize = Integer.parseInt(args[0]);
+        }
+
+        ExecutorService executor =
+                Executors.newFixedThreadPool(poolSize);
+
+        ConcurrentLinkedQueue<String> results =
+                new ConcurrentLinkedQueue<>();
+
+        List<Future<String>> futures = new ArrayList<>();
+
+        long startTime = System.currentTimeMillis();
+
+        File folder = new File("scores");
+
+        File[] files = folder.listFiles();
+
+        if (files == null) {
+            System.out.println("Scores folder not found.");
+            executor.shutdown();
+            return;
+        }
+
+        for (File file : files) {
+
+            if (file.isFile()) {
+
+                futures.add(
+                    executor.submit(
+                        new ResultTask(file.getPath())
+                    )
+                );
+            }
+        }
+
+        executor.shutdown();
+
+        for (Future<String> future : futures) {
+
+            try {
+                String result = future.get();
+
+                results.add(result);
+
+            } catch (ExecutionException e) {
+                results.add("FAILED: " + e.getCause());
+            }
+        }
+
+        int success = 0;
+        int failure = 0;
+
+        for (String result : results) {
+
+            System.out.println(result);
+
+            if (result.startsWith("SUCCESS")) {
+                success++;
+            } else {
+                failure++;
+            }
+        }
+
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("\n----- FINAL SUMMARY -----");
+        System.out.println("Total Files: " + results.size());
+        System.out.println("Successful: " + success);
+        System.out.println("Failed: " + failure);
+
+        System.out.println(
+            "Execution Time: "
+            + (endTime - startTime) + " ms"
+        );
+
+        System.out.println("Thread Pool Size: " + poolSize);
+    }
+}
