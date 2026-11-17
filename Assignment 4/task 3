@@ -1,0 +1,114 @@
+
+import javax.swing.*;
+import java.awt.*;
+
+public class LibrarySearch extends JFrame {
+
+    JTextField searchField = new JTextField(20);
+
+    JComboBox<String> category =
+        new JComboBox<>(new String[]{
+            "All", "Java", "Python", "Database", "AI"
+        });
+
+    JTextArea results = new JTextArea();
+
+    JLabel status = new JLabel("Ready to search");
+
+    public LibrarySearch() {
+
+        setTitle("Campus Library Search");
+
+        setLayout(new BorderLayout(10, 10));
+
+        // Top title
+        JLabel title = new JLabel(
+            "CAMPUS LIBRARY",
+            JLabel.CENTER
+        );
+
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+
+        add(title, BorderLayout.NORTH);
+
+        // Search panel
+        JPanel searchPanel = new JPanel(new FlowLayout());
+
+        searchPanel.add(new JLabel("Search:"));
+        searchPanel.add(searchField);
+        searchPanel.add(category);
+
+        JButton search = new JButton("Search");
+        searchPanel.add(search);
+
+        // Center results
+        results.setEditable(false);
+
+        JScrollPane scroll = new JScrollPane(results);
+
+        // Bottom panel
+        JPanel bottom = new JPanel(new BorderLayout());
+
+        JPanel buttons = new JPanel(new FlowLayout());
+
+        JButton prev = new JButton("Prev");
+        JButton next = new JButton("Next");
+        JButton reserve = new JButton("Reserve");
+
+        buttons.add(prev);
+        buttons.add(next);
+        buttons.add(reserve);
+
+        bottom.add(buttons, BorderLayout.CENTER);
+        bottom.add(status, BorderLayout.SOUTH);
+
+        // Add panels
+        JPanel north = new JPanel(new BorderLayout());
+
+        north.add(title, BorderLayout.NORTH);
+        north.add(searchPanel, BorderLayout.SOUTH);
+
+        add(north, BorderLayout.NORTH);
+        add(scroll, BorderLayout.CENTER);
+        add(bottom, BorderLayout.SOUTH);
+
+        search.addActionListener(e -> {
+
+            String keyword = searchField.getText();
+
+            if (keyword.trim().isEmpty()) {
+                status.setText("Enter a book name");
+                return;
+            }
+
+            results.setText(
+                "Search Results\n" +
+                "Book: " + keyword +
+                "\nCategory: " + category.getSelectedItem()
+            );
+
+            status.setText("Search completed");
+        });
+
+        reserve.addActionListener(e ->
+            status.setText("Book reserved successfully")
+        );
+
+        prev.addActionListener(e ->
+            status.setText("Previous page")
+        );
+
+        next.addActionListener(e ->
+            status.setText("Next page")
+        );
+
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        setSize(650, 450);
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() ->
+            new
