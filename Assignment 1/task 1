@@ -1,0 +1,88 @@
+import java.time.LocalDateTime;
+import java.util.*;
+
+class Vehicle {
+    private String regNo;
+    private String type;
+
+    Vehicle(String regNo, String type) {
+        this.regNo = regNo;
+        this.type = type;
+    }
+
+    public String getRegNo() {
+        return regNo;
+    }
+
+    public String getType() {
+        return type;
+    }
+}
+
+class ParkingSlot {
+    private int floor;
+    private int slotNo;
+    private Vehicle vehicle;
+
+    ParkingSlot(int floor, int slotNo) {
+        this.floor = floor;
+        this.slotNo = slotNo;
+    }
+
+    public boolean isFree() {
+        return vehicle == null;
+    }
+
+    public void park(Vehicle vehicle) {
+        if (isFree()) {
+            this.vehicle = vehicle;
+        }
+    }
+
+    public void release() {
+        vehicle = null;
+    }
+}
+
+class ParkingTicket {
+    private static int counter = 1000;
+    private int ticketNo;
+    private Vehicle vehicle;
+    private LocalDateTime entryTime;
+
+    ParkingTicket(Vehicle vehicle) {
+        ticketNo = ++counter;
+        this.vehicle = vehicle;
+        entryTime = LocalDateTime.now();
+    }
+
+    public int getTicketNo() {
+        return ticketNo;
+    }
+
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    public LocalDateTime getEntryTime() {
+        return entryTime;
+    }
+}
+
+public class Task01 {
+    public static void main(String[] args) {
+        Vehicle v = new Vehicle("TN01AB1234", "Car");
+        ParkingSlot slot = new ParkingSlot(0, 1);
+        ParkingTicket ticket = new ParkingTicket(v);
+
+        slot.park(v);
+
+        System.out.println("Vehicle: " + v.getRegNo());
+        System.out.println("Type: " + v.getType());
+        System.out.println("Ticket: " + ticket.getTicketNo());
+        System.out.println("Slot Free: " + slot.isFree());
+
+        slot.release();
+        System.out.println("After Exit: " + slot.isFree());
+    }
+}
