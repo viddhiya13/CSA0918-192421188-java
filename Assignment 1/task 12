@@ -1,0 +1,270 @@
+import java.util.*;
+
+interface Pass {
+    boolean isValid();
+}
+
+class OneDayPass implements Pass {
+    private final String owner;
+    private final boolean valid;
+
+    OneDayPass(String owner) {
+        this.owner = owner;
+        this.valid = true;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    @Override
+    public boolean isValid() {
+        return valid;
+    }
+}
+
+abstract class Vehicle {
+    private final String regNo;
+
+    Vehicle(String regNo) {
+        if (regNo == null || regNo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid registration number");
+        }
+        this.regNo = regNo;
+    }
+
+    public String getRegNo() {
+        return regNo;
+    }
+}
+
+class Car extends Vehicle {
+    Car(String regNo) {
+        super(regNo);
+    }
+}
+
+class TwoWheeler extends Vehicle {
+    TwoWheeler(String regNo) {
+        super(regNo);
+    }
+}
+
+class ElectricCar extends Vehicle {
+    ElectricCar(String regNo) {
+        super(regNo);
+    }
+}
+
+class EBike extends Vehicle {
+    EBike(String regNo) {
+        super(regNo);
+    }
+}
+
+class DeliveryVan extends Vehicle {
+    DeliveryVan(String regNo) {
+        super(regNo);
+    }
+}
+
+interface PricingRule {
+    double calculate(Vehicle vehicle, int minutes, int entryHour);
+}
+
+class CampusPricingRule implements PricingRule {
+    @Override
+    public double calculate(Vehicle vehicle, int minutes, int entryHour) {
+        int hours = (minutes + 59) / 60;
+
+        if (vehicle instanceof EBike) {
+            return 20.0;
+        }
+
+        if (vehicle instanceof DeliveryVan) {
+            double rate = (entryHour >= 9 && entryHour < 17)
+                    ? 60.0 : 30.0;
+            return hours * rate;
+        }
+
+        if (vehicle instanceof TwoWheeler) {
+            return hours * 10.0;
+        }
+
+        if (vehicle instanceof ElectricCar) {
+            return hours * 30.0;
+        }
+
+        if (vehicle instanceof Car) {
+            return hours * 30.0;
+        }
+
+        throw new IllegalArgumentException("Unknown vehicle type");
+    }
+}
+
+class ParkingTicket {
+    private static int counter = 2000;
+
+    private final int ticketNo;
+    private final Vehicle vehicle;
+    private final int floor;
+    private final int slot;
+    private final Pass pass;
+
+    ParkingTicket(Vehicle vehicle, int floor, int slot, Pass pass) {
+        this.ticketNo = ++counter;
+        this.vehicle = vehicle;
+        this.floor = floor;
+        this.slot = slot;
+        this.pass = pass;
+    }
+
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    public int getFloor() {
+        return floor;
+    }
+
+    public int getSlot() {
+        return slot;
+    }
+
+    public Pass getPass() {
+        return pass;
+    }
+
+    public void display() {
+        System.out.println("Ticket: " + ticketNo);
+        System.out.println("Vehicle: " + vehicle.getRegNo());
+        System.out.println("Slot: " + floor + "-" + slot);
+    }
+}
+
+class ParkingFacility {
+    private final String[][] slots;
+    private final Map<String, ParkingTicket> activeTickets =
+            new HashMap<>();
+
+    private final PricingRule pricingRule;
+
+    ParkingFacility(int[] slotsPerFloor, PricingRule pricingRule) {
+        slots = new String[slotsPerFloor.length][];
+
+        for (int i = 0; i < slotsPerFloor.length; i++) {
+            slots[i] = new String[slotsPerFloor[i]];
+        }
+
+        this.pricingRule = pricingRule;
+    }
+
+    public ParkingTicket enter(Vehicle vehicle, Pass pass) {
+        if (activeTickets.containsKey(vehicle.getRegNo())) {
+            System.out.println("Duplicate Registration Number");
+            return null;
+        }
+
+        for (int f = 0; f < slots.length; f++) {
+            for (int s = 0; s < slots[f].length; s++) {
+                if (slots[f][s] == null) {
+                    slots[f][s] = vehicle.getRegNo();
+
+                    ParkingTicket ticket =
+                            new ParkingTicket(vehicle, f, s, pass);
+
+                    activeTickets.put(vehicle.getRegNo(), ticket);
+                    return ticket;
+                }
+            }
+        }
+
+        System.out.println("Parking Full");
+        return null;
+    }
+
+    public double exit(String regNo, int minutes, int entryHour) {
+        ParkingTicket ticket = activeTickets.remove(regNo);
+
+        if (ticket == null) {
+            System.out.println("Ticket Not Found");
+            return -1;
+        }
+
+        double fee;
+
+        if (ticket.getPass() != null && ticket.getPass().isValid()) {
+            fee = 0.0;
+        } else {
+            fee = pricingRule.calculate(
+                    ticket.getVehicle(), minutes, entryHour);
+        }
+
+        slots[ticket.getFloor()][ticket.getSlot()] = null;
+
+        System.out.println("Vehicle: " + regNo);
+        System.out.println("Parking Fee: Rs " + fee);
+
+        return fee;
+    }
+
+    public void displaySlots() {
+        for (int f = 0; f < slots.length; f++) {
+            System.out.println("Floor " + f + ": "
+                    + Arrays.toString(slots[f]));
+        }
+    }
+}
+
+public class Task12 {
+    public static void main(String[] args) {
+        // Five floors with different slot counts.
+        int[] floorCapacity = {3, 4, 5, 3, 6};
+
+        PricingRule rule = new CampusPricingRule();
+
+        ParkingFacility parking =
+                new ParkingFacility(floorCapacity, rule);
+
+        Vehicle car = new Car("TN01CA1111");
+        Vehicle ebike = new EBike("TN02EB2222");
+        Vehicle van = new DeliveryVan("TN03DV3333");
+        Vehicle ev = new ElectricCar("TN04EV4444");
+        Vehicle bike = new TwoWheeler("TN05TW5555");
+
+        Pass dayPass = new OneDayPass("Visitor");
+
+        System.out.println("Vehicle Entry");
+
+        ParkingTicket t1 = parking.enter(car, null);
+        ParkingTicket t2 = parking.enter(ebike, null);
+        ParkingTicket t3 = parking.enter(van, null);
+        ParkingTicket t4 = parking.enter(ev, dayPass);
+        ParkingTicket t5 = parking.enter(bike, null);
+
+        if (t1 != null) t1.display();
+        if (t2 != null) t2.display();
+        if (t3 != null) t3.display();
+        if (t4 != null) t4.display();
+        if (t5 != null) t5.display();
+
+        System.out.println("\nFive-Floor Parking Layout");
+        parking.displaySlots();
+
+        System.out.println("\nExit and Fee Calculation");
+
+        double total = 0;
+
+        total += parking.exit("TN01CA1111", 120, 10);
+        total += parking.exit("TN02EB2222", 60, 11);
+        total += parking.exit("TN03DV3333", 120, 10);
+        total += parking.exit("TN04EV4444", 180, 12);
+        total += parking.exit("TN05TW5555", 60, 18);
+
+        System.out.println("\nTotal Collection: Rs " + total);
+
+        System.out.println("\nFinal Parking Layout");
+        parking.displaySlots();
+    }
+}
