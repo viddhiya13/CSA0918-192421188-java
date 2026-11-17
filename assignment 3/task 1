@@ -1,0 +1,50 @@
+
+import java.util.*;
+import java.io.*;
+
+public class ATMWithdrawal {
+
+    static void withdraw(int balance, int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+
+        if (amount > balance) {
+            throw new ArithmeticException("Insufficient balance");
+        }
+
+        System.out.println("Withdrawal successful!");
+        System.out.println("Remaining Balance: " + (balance - amount));
+    }
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        try {
+            System.out.print("Enter Account Number: ");
+            int account = Integer.parseInt(sc.nextLine());
+
+            System.out.print("Enter Withdrawal Amount: ");
+            int amount = Integer.parseInt(sc.nextLine());
+
+            FileInputStream file = new FileInputStream("card.txt");
+            file.close();
+
+            withdraw(10000, amount);
+
+        } catch (NumberFormatException | IllegalArgumentException e) {
+            System.out.println("Invalid input: " + e.getMessage());
+
+        } catch (ArithmeticException e) {
+            System.out.println("Transaction Failed: " + e.getMessage());
+
+        } catch (IOException e) {
+            System.out.println("Card Reader Error: " + e.getMessage());
+
+        } finally {
+            System.out.println("ATM transaction completed.");
+            sc.close();
+        }
+    }
+}
