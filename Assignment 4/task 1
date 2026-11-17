@@ -1,0 +1,113 @@
+
+import java.awt.*;
+import java.awt.event.*;
+
+class FeeService {
+
+    boolean payFee(String regNo, double amount) {
+
+        if (regNo.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Enter Register Number"
+            );
+        }
+
+        if (amount <= 0) {
+            throw new IllegalArgumentException(
+                "Enter a valid amount"
+            );
+        }
+
+        // Payment simulation
+        return true;
+    }
+}
+
+public class FeeWindow extends Frame {
+
+    TextField regNo = new TextField(20);
+    TextField amount = new TextField(20);
+
+    Button pay = new Button("Pay");
+    Button clear = new Button("Clear");
+    Button receipt = new Button("Receipt");
+
+    Label status = new Label("Enter payment details");
+
+    FeeService service = new FeeService();
+
+    public FeeWindow() {
+
+        setTitle("Student Fee Payment");
+
+        setLayout(new GridLayout(5, 2, 10, 10));
+
+        add(new Label("Register Number:"));
+        add(regNo);
+
+        add(new Label("Amount:"));
+        add(amount);
+
+        add(pay);
+        add(clear);
+
+        add(receipt);
+        add(status);
+
+        pay.addActionListener(e -> makePayment());
+
+        clear.addActionListener(e -> {
+            regNo.setText("");
+            amount.setText("");
+            status.setText("Fields cleared");
+        });
+
+        receipt.addActionListener(e -> {
+            status.setText("Receipt generated successfully");
+        });
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        setSize(450, 250);
+        setVisible(true);
+    }
+
+    void makePayment() {
+
+        try {
+            String register = regNo.getText().trim();
+            double value = Double.parseDouble(amount.getText());
+
+            service.payFee(register, value);
+
+            status.setText("Payment Successful");
+
+            Dialog d = new Dialog(this, "Payment Receipt", true);
+
+            d.setLayout(new FlowLayout());
+            d.add(new Label("Register Number: " + register));
+            d.add(new Label("Amount Paid: Rs. " + value));
+
+            Button close = new Button("Close");
+            close.addActionListener(e -> d.dispose());
+
+            d.add(close);
+            d.setSize(300, 150);
+            d.setVisible(true);
+
+        } catch (NumberFormatException e) {
+            status.setText("Enter a valid amount");
+
+        } catch (IllegalArgumentException e) {
+            status.setText(e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        new FeeWindow();
+    }
+}
