@@ -1,0 +1,78 @@
+import java.io.*;
+import java.nio.file.*;
+
+public class LineCounter {
+
+    public static long unbufferedCount(String filename) throws IOException {
+        long lines = 0;
+        int last = -1;
+        boolean hasData = false;
+
+        try (FileInputStream fis = new FileInputStream(filename)) {
+            int ch;
+
+            while ((ch = fis.read()) != -1) {
+                if (ch == '\n') lines++;
+                last = ch;
+                hasData = true;
+            }
+        }
+
+        if (hasData && last != '\n') lines++;
+        return lines;
+    }
+
+    public static long bufferedCount(String filename) throws IOException {
+        long lines = 0;
+        int last = -1;
+        boolean hasData = false;
+
+        try (BufferedInputStream bis = new BufferedInputStream(
+                new FileInputStream(filename))) {
+
+            byte[] buffer = new byte[8192];
+            int count;
+
+            while ((count = bis.read(buffer)) != -1) {
+                hasData = true;
+
+                for (int i = 0; i < count; i++) {
+                    if (buffer[i] == '\n') lines++;
+                    last = buffer[i];
+                }
+            }
+        }
+
+        if (hasData && last != '\n') lines++;
+        return lines;
+    }
+
+    public static void main(String[] args) throws Exception {
+        String filename = "attendance.txt";
+
+        if (!Files.exists(Paths.get(filename))) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
+                for (int i = 1; i <= 100000; i++) {
+                    bw.write("Attendance " + i);
+                    bw.newLine();
+                }
+            }
+        }
+
+        long start = System.nanoTime();
+        System.out.println("Unbuffered lines: " +
+                unbufferedCount(filename));
+        long end = System.nanoTime();
+
+        System.out.println("Unbuffered time: " +
+                (end - start) / 1_000_000.0 + " ms");
+
+        start = System.nanoTime();
+        System.out.println("Buffered lines: " +
+                bufferedCount(filename));
+        end = System.nanoTime();
+
+        System.out.println("Buffered time: " +
+                (end - start) / 1_000_000.0 + " ms");
+    }
+}
