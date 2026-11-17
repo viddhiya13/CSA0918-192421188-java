@@ -1,0 +1,70 @@
+class ParkingTicket {
+    private static int ticketCounter = 1000;
+
+    private final int ticketNo;
+    private final String vehicleNo;
+
+    ParkingTicket(String vehicleNo) {
+        ticketNo = ++ticketCounter;
+        this.vehicleNo = vehicleNo;
+    }
+
+    public void display() {
+        System.out.println("Ticket: " + ticketNo
+                + ", Vehicle: " + vehicleNo);
+    }
+
+    public static int getTotalTickets() {
+        return ticketCounter - 1000;
+    }
+}
+
+class ParkingFacility {
+    private static int totalOccupancy = 0;
+
+    public void vehicleEntered() {
+        totalOccupancy++;
+    }
+
+    public void vehicleExited() {
+        if (totalOccupancy > 0) {
+            totalOccupancy--;
+        }
+    }
+
+    public static int getTotalOccupancy() {
+        return totalOccupancy;
+    }
+}
+
+public class Task05 {
+    public static void main(String[] args) {
+        ParkingFacility north = new ParkingFacility();
+        ParkingFacility south = new ParkingFacility();
+
+        ParkingTicket t1 = new ParkingTicket("TN01AB1234");
+        ParkingTicket t2 = new ParkingTicket("TN02CD5678");
+
+        north.vehicleEntered();
+        south.vehicleEntered();
+
+        t1.display();
+        t2.display();
+
+        System.out.println("Total Tickets: "
+                + ParkingTicket.getTotalTickets());
+
+        System.out.println("Total Occupancy: "
+                + ParkingFacility.getTotalOccupancy());
+
+        north.vehicleExited();
+
+        System.out.println("Occupancy After Exit: "
+                + ParkingFacility.getTotalOccupancy());
+
+        t1 = null;
+        t2 = null;
+
+        System.gc();
+    }
+}
