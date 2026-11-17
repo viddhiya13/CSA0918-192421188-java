@@ -1,0 +1,67 @@
+class ParkingSlot {
+    private int floor;
+    private int slotNumber;
+    private String vehicleNumber;
+
+    public ParkingSlot(int floor, int slotNumber) {
+        setFloor(floor);
+        setSlotNumber(slotNumber);
+    }
+
+    public void setFloor(int floor) {
+        if (floor < 0) {
+            throw new IllegalArgumentException("Invalid floor number");
+        }
+        this.floor = floor;
+    }
+
+    public void setSlotNumber(int slotNumber) {
+        if (slotNumber < 0) {
+            throw new IllegalArgumentException("Invalid slot number");
+        }
+        this.slotNumber = slotNumber;
+    }
+
+    public void parkVehicle(String vehicleNumber) {
+        if (vehicleNumber == null || vehicleNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid vehicle number");
+        }
+
+        if (this.vehicleNumber != null) {
+            throw new IllegalStateException("Slot is already occupied");
+        }
+
+        this.vehicleNumber = vehicleNumber;
+    }
+
+    public void releaseVehicle() {
+        vehicleNumber = null;
+    }
+
+    public void display() {
+        System.out.println("Floor: " + floor);
+        System.out.println("Slot: " + slotNumber);
+        System.out.println("Vehicle: "
+                + (vehicleNumber == null ? "Free" : vehicleNumber));
+    }
+}
+
+public class Task10 {
+    public static void main(String[] args) {
+        ParkingSlot slot = new ParkingSlot(0, 5);
+
+        slot.parkVehicle("TN01AB1234");
+        slot.display();
+
+        slot.releaseVehicle();
+
+        System.out.println("\nAfter Vehicle Exit");
+        slot.display();
+
+        Integer a = 1000;
+        Integer b = 1000;
+
+        System.out.println("Integer comparison using equals(): "
+                + a.equals(b));
+    }
+}
