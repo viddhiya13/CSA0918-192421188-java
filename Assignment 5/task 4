@@ -1,0 +1,74 @@
+import java.io.*;
+import java.sql.Connection;
+import java.util.*;
+
+class Resident implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    String name;
+    String registerNo;
+    transient String password;
+    transient Connection connection;
+
+    Resident(String name, String registerNo, String password) {
+        this.name = name;
+        this.registerNo = registerNo;
+        this.password = password;
+    }
+}
+
+class Room implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    int roomNumber;
+    ArrayList<Resident> residents = new ArrayList<>();
+
+    Room(int roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+}
+
+class Hostel implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    String hostelName;
+    ArrayList<Room> rooms = new ArrayList<>();
+
+    Hostel(String hostelName) {
+        this.hostelName = hostelName;
+    }
+}
+
+public class HostelSerialization {
+    public static void main(String[] args) throws Exception {
+
+        Hostel hostel = new Hostel("SIMATS Hostel");
+
+        Room room = new Room(101);
+
+        room.residents.add(
+                new Resident("Arun", "192311001", "password123"));
+
+        hostel.rooms.add(room);
+
+        ObjectOutputStream out = new ObjectOutputStream(
+                new FileOutputStream("hostel.dat"));
+
+        out.writeObject(hostel);
+        out.close();
+
+        ObjectInputStream in = new ObjectInputStream(
+                new FileInputStream("hostel.dat"));
+
+        Hostel loaded = (Hostel) in.readObject();
+        in.close();
+
+        Resident r = loaded.rooms.get(0).residents.get(0);
+
+        System.out.println("Hostel: " + loaded.hostelName);
+        System.out.println("Room: " + loaded.rooms.get(0).roomNumber);
+        System.out.println("Resident: " + r.name);
+        System.out.println("Register Number: " + r.registerNo);
+        System.out.println("Password: " + r.password);
+    }
+}
