@@ -1,0 +1,79 @@
+class Vehicle {
+    private final String regNo;
+
+    Vehicle(String regNo) {
+        this.regNo = regNo;
+    }
+
+    public String getRegNo() {
+        return regNo;
+    }
+
+    public double calculateFee(int minutes) {
+        int hours = (minutes + 59) / 60;
+        return hours * 20.0;
+    }
+
+    @Override
+    public String toString() {
+        return "Vehicle: " + regNo;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+
+        if (!(obj instanceof Vehicle)) return false;
+
+        Vehicle other = (Vehicle) obj;
+        return regNo.equals(other.regNo);
+    }
+
+    @Override
+    public int hashCode() {
+        return regNo.hashCode();
+    }
+}
+
+class TwoWheeler extends Vehicle {
+    TwoWheeler(String regNo) {
+        super(regNo);
+    }
+
+    @Override
+    public double calculateFee(int minutes) {
+        int hours = (minutes + 59) / 60;
+        return hours * 10.0;
+    }
+}
+
+class Car extends Vehicle {
+    Car(String regNo) {
+        super(regNo);
+    }
+
+    @Override
+    public double calculateFee(int minutes) {
+        int hours = (minutes + 59) / 60;
+        return hours * 30.0;
+    }
+}
+
+public class Task07 {
+    public static void main(String[] args) {
+        Vehicle bike = new TwoWheeler("TN01AB1234");
+        Vehicle car = new Car("TN02CD5678");
+
+        System.out.println(bike);
+        System.out.println("Bike Fee: Rs " + bike.calculateFee(130));
+
+        System.out.println(car);
+        System.out.println("Car Fee: Rs " + car.calculateFee(130));
+
+        Vehicle v1 = new Car("TN03EF9999");
+        Vehicle v2 = new TwoWheeler("TN03EF9999");
+
+        System.out.println("Are Vehicles Equal? " + v1.equals(v2));
+        System.out.println("Hash Code: " + v1.hashCode());
+    }
+}
