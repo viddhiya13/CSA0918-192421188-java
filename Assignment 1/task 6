@@ -1,0 +1,56 @@
+class Vehicle {
+    protected String regNo;
+
+    Vehicle(String regNo) {
+        this.regNo = regNo;
+        System.out.println("Vehicle Constructor");
+    }
+
+    public void display() {
+        System.out.println("Registration Number: " + regNo);
+    }
+}
+
+class Car extends Vehicle {
+    protected int seats;
+
+    Car(String regNo, int seats) {
+        super(regNo);
+        this.seats = seats;
+        System.out.println("Car Constructor");
+    }
+}
+
+class ElectricCar extends Car {
+    private int batteryCapacity;
+
+    ElectricCar(String regNo, int seats, int batteryCapacity) {
+        super(regNo, seats);
+        this.batteryCapacity = batteryCapacity;
+        System.out.println("ElectricCar Constructor");
+    }
+
+    public void showDetails() {
+        display();
+        System.out.println("Seats: " + seats);
+        System.out.println("Battery Capacity: " + batteryCapacity + " kWh");
+    }
+}
+
+class TwoWheeler extends Vehicle {
+    TwoWheeler(String regNo) {
+        super(regNo);
+    }
+}
+
+public class Task06 {
+    public static void main(String[] args) {
+        ElectricCar ev = new ElectricCar("TN01EV1234", 5, 60);
+
+        System.out.println("\nElectric Car Details");
+        ev.showDetails();
+
+        TwoWheeler bike = new TwoWheeler("TN02BK5678");
+        bike.display();
+    }
+}
